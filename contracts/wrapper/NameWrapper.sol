@@ -183,6 +183,7 @@ abstract contract NameWrapper is
     )
         public
         view
+        virtual
         override(ERC1155Fuse, INameWrapper)
         returns (address owner, uint32 fuses, uint64 expiry)
     {
