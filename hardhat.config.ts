@@ -13,6 +13,8 @@ const config: HardhatUserConfig = {
           },
         },
       },
+       
+
       // for DummyOldResolver contract
       {
         version: '0.4.11',
@@ -24,6 +26,15 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+  },
+   networks: {
+    goerli: {
+      // Configuration for the Hardhat network (for local development)
+      chainId: 5,
+            accounts: [`0x${process.env.ROPSTEN_PRIVATE_KEY}`]
+
+    }
+    // You can add more networks here (e.g., mainnet, rinkeby, etc.)
   },
 };
 
