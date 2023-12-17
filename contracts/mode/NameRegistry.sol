@@ -13,11 +13,12 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract NameRegistry is ERC721Enumerable, Ownable {
     using SafeMath for uint256;
     using Strings for uint256;
+    IERC721 public zapTokenContract; // Address of the ZAP token contract
 
     uint256 public nextTokenId = 1; // ID for the next token to be minted
     uint256 public baseRegistrationPrice = 0.01 ether - 0.0002 ether; // Base registration price for a name
     uint256 public registrationDuration = 365 days; // Default registration duration
-    string private tld = ".mode"; // The top-level domain
+    string private tld = ".zap"; // The top-level domain
 
     mapping(string => uint256) public namePrices; // Mapping of names to their custom registration prices
     mapping(string => bool) public nameExists; // Mapping to track whether a name is registered
@@ -32,8 +33,15 @@ contract NameRegistry is ERC721Enumerable, Ownable {
     event NameTransferred(address indexed from, address indexed to, string name);
     event NameRenewed(address indexed owner, string name, uint256 newExpiryTimestamp);
 
-    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol, address _zapTokenContract) {
 
+        zapTokenContract = IERC721(_zapTokenContract);
+
+    }
+  modifier requiresZapToken() {
+        require(zapTokenContract.balanceOf(msg.sender) > 0, "Requires ownership of ZAP token");
+        _;
+    }
     /**
      * @dev Update the base registration price.
      * @param price The new base registration price.
@@ -128,7 +136,7 @@ contract NameRegistry is ERC721Enumerable, Ownable {
      * @param metadataURI The metadata URI for the associated NFT.
      * @notice This function requires a payment of at least the calculated registration price in wei.
      */
-    function registerName(string memory name, string memory metadataURI) external payable {
+    function registerName(string memory name, string memory metadataURI) external payable requiresZapToken {
         require(nameExists[name] == false, "Name is already registered");
         require(!_isAddressRegistered(msg.sender), "Address is already registered with a name");
 
