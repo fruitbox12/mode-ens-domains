@@ -1,26 +1,26 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  // Deployer account information
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying contracts with the account:", deployer.address);
 
-  const lockedAmount = ethers.parseEther("0.001");
+  // Deployment parameters
+  const name = "ZapNameService"; // Replace with your desired NFT name
+  const symbol = "ZNS"; // Replace with your desired NFT symbol
+  const zapTokenContractAddress = "0x6781a0f84c7e9e846dcb84a9a5bd49333067b104"; // Replace with the actual ZAP token contract address
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
+  // Deploying NameRegistry contract
+  const NameRegistry = await ethers.getContractFactory("NameRegistry");
+  const nameRegistry = await NameRegistry.deploy(name, symbol, zapTokenContractAddress);
 
-  await lock.waitForDeployment();
+  // Waiting for the contract to be deployed
+  await nameRegistry.deployed();
 
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+  console.log("NameRegistry deployed to:", nameRegistry.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
+// Error handling
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
